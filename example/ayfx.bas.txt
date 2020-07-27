@@ -1,0 +1,36 @@
+#autoline 10
+RUN AT 3
+
+; *************************************************
+; This example runs a counter from 0-999 and loops
+; whilst listening for a keypress. If the keypress
+; is 'q' then the program will exit. Otherwise the
+; keypress' value is used to play back an effect.
+; If the effect value is unknown, there won't be
+; any sound effect. The example.afb effects bank
+; includes 6 effects indexed from 0 to 5.
+; ************************************************
+
+CLS
+
+LOAD "example.afb" BANK 22
+.install "ayfx.drv"
+DRIVER 83,1,22: ; driver id: 83, callId: 1 (init), arg: 22 (bank 22 holds fx)
+
+%i=0:%j=0
+l$=""
+k$=""
+PRINT AT 0,0;"BASIC running, enter 0-5 to play sfx"
+REPEAT
+  k$= INKEY$
+  PRINT AT 1,0;%i;"   "
+  %i=%(i+1) MOD 999
+  IF k$ <> l$ AND (k$ <> "") THEN PROC playFx( VAL k$)
+  l$=k$
+REPEAT UNTIL k$="q"
+
+DEFPROC playFx(n)
+  DRIVER 83,2,n: ; driver id: 83, callId: 2 (play), arg: <number> index of fx
+  %j=%j+1
+  PRINT AT 2,0;%j;" sfx calls"
+ENDPROC
