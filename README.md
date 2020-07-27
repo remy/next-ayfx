@@ -18,7 +18,7 @@ You will need the `ayfx.drv` file accessible to your project. Then `.install` th
 
 ```basic
 10 .install "ayfx.drv"
-20 LOAD "my-sfx.afb" BANK 20
+20 LOAD "my-sfx.afb" BANK 20 : REM bank 20 is picked arbitrarily
 30 DRIVER 83, 1, 20 : REM point the driver to your bank 20
 40 REPEAT
 50   k$ = INKEY$
