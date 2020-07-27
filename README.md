@@ -26,7 +26,7 @@ You will need the `ayfx.drv` file accessible to your project. Then `.install` th
 70 REPEAT UNTIL 0 : REM loop forever
 ```
 
-You can also view the [examples]() directory for other NextBASIC examples.
+You can also view the [examples](https://github.com/remy/next-ayfx/tree/main/example) directory for other NextBASIC examples.
 
 ## Driver API
 
@@ -39,7 +39,7 @@ There are currently only two routines available in the driver:
 
 If you use Windows, you can install and use [Shiru's AYFX Editor](https://shiru.untergrund.net/software.shtml#old) (though it works, it doesn't quite render correctly on newer machines).
 
-Alternatively I have created an online tool that replicates the AYFX UI (which also works offline) where you can create, edit, preview and save your own effects.
+Alternatively I have created an online tool that replicates the AYFX UI (which also works offline) where you can create, edit, preview and save your own effects: https://zx.remysharp.com/audio/
 
 Once you've designed your sound effects, **save the bank** of effects taking note of the position of the effects. This is the file you will need to load into a NextBASIC `BANK` (seen in the example on line 20).
 
