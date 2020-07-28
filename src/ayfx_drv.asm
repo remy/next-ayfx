@@ -34,8 +34,7 @@ relocs  equ     (reloc_end-reloc_start)/2
 
         defm    "NDRV"          ; .DRV file signature
 
-        defb    $53+$80         ; RS Note: I picked 0x53 (83) out of hat, it's
-				; ascii for 'S' (for sfx) ¯\_(ツ)_/¯
+        defb    $31+$80         ; DRIVER ID 0x31 assigned by Garry Lancaster
 				; 7-bit unique driver id in bits 0..6
                                 ; bit 7=1 if to be called on IM1 interrupts
 

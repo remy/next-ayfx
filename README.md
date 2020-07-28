@@ -19,10 +19,10 @@ You will need the `ayfx.drv` file accessible to your project. Then `.install` th
 ```basic
 10 .install "ayfx.drv"
 20 LOAD "my-sfx.afb" BANK 20 : REM bank 20 is picked arbitrarily
-30 DRIVER 83, 1, 20 : REM point the driver to your bank 20
+30 DRIVER 49, 1, 20 : REM point the driver to your bank 20
 40 REPEAT
 50   k$ = INKEY$
-60   DRIVER 83, 2, VAL k$ : REM play the fx at the numerical value k$
+60   DRIVER 49, 2, VAL k$ : REM play the fx at the numerical value k$
 70 REPEAT UNTIL 0 : REM loop forever
 ```
 
@@ -34,6 +34,8 @@ There are currently only two routines available in the driver:
 
 - `1, arg: $bank_id` - initialise the audio to point a 16K bank
 - `2, arg: $effects_id` - start playing the given effect id
+
+**The driver id is 49 (hex 0x31)**
 
 ## Creating Sound Effects
 

@@ -15,7 +15,7 @@ CLS
 
 LOAD "example.afb" BANK 22
 .install "ayfx.drv"
-DRIVER 83,1,22: ; driver id: 83, callId: 1 (init), arg: 22 (bank 22 holds fx)
+DRIVER 49,1,22: ; driver id: 49, callId: 1 (init), arg: 22 (bank 22 holds fx)
 
 %i=0:%j=0
 l$=""
@@ -30,7 +30,7 @@ REPEAT
 REPEAT UNTIL k$="q"
 
 DEFPROC playFx(n)
-  DRIVER 83,2,n: ; driver id: 83, callId: 2 (play), arg: <number> index of fx
+  DRIVER 49,2,n: ; driver id: 49, callId: 2 (play), arg: <number> index of fx
   %j=%j+1
   PRINT AT 2,0;%j;" sfx calls"
 ENDPROC
