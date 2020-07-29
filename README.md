@@ -28,6 +28,10 @@ You will need the `ayfx.drv` file accessible to your project. Then `.install` th
 
 You can also view the [examples](https://github.com/remy/next-ayfx/tree/main/example) directory for other NextBASIC examples.
 
+## Using with NextDAW
+
+Important: if you're using this driver with the NextDAW driver, make sure to **install the NextDAW driver first** otherwise you'll hear some very bad audio corruption.
+
 ## Driver API
 
 There are currently only two routines available in the driver:
