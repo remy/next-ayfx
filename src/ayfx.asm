@@ -24,7 +24,7 @@ im1_entry:
 reloc_ir_1:
 	ld 	a,(ayfx_bank)
 	add	a
-	jr	z,skip
+	jr	z, im1_skip
 reloc_ir_2:
 	call	activate_user_bank
 	push	ix 			; the ayfx uses IX, so preseve it
@@ -33,7 +33,7 @@ reloc_ir_3:
 reloc_ir_4:
 	call	restore_bank		; put the original bank back into MMU6
 	pop	ix			; restore ix back to it's initial state
-skip:
+im1_skip:
 	ret
 
 ; ***************************************************************************
@@ -52,7 +52,7 @@ ayfx_api:
 	djnz	bnot1			; On if B<>1
 
 ; **************************************************************
-; * B=1 and DE=user bank holding the sound effects
+; * B=1 and DE=user bank holding the sound effects,
 ; **************************************************************
 
 callId1_load_bank:
@@ -63,11 +63,25 @@ reloc_c1_1:
 reloc_c1_2:
 	ld	(ayfx_bank),a		; store it for future use
 	nextreg MMU6_C000_NR_56, a 	; load the user's bank in
-	push	ix
+
+	; read HL (ignoring H) and uses for the AY chip selection.
+	; 0 is default (i.e. not provided) using AY3. Otherwise,
+	; 1-3 selects the appropriate chip
+	ld	a,l			; read HL as the chip select
+	and	3			; used to check zero for default
+	jr	nz,c1_save_chip_select
+	ld	l,3			; if HL=0 (nothing loaded) we default to AY 3
+c1_save_chip_select:
+	ld	a,0
+	sub	l			; 0 - a = 255 - (0-2) which gives us our AY
 reloc_c1_3:
+	ld	(ay_chip_select),a	; save the AY chip select
+
+	push	ix			; ix is modified by AFXINIT
+reloc_c1_4:
 	call 	AFXINIT
 	pop	ix
-reloc_c1_4:
+reloc_c1_5:
 	call	restore_bank
 	and     a                       ; clear carry to indicate success
 	ret
@@ -179,7 +193,7 @@ AFXINIT
 reloc_in_1:
 	ld hl,afxChDesc		        ; mark all channels as empty
 	ld de,#00ff
-	ld bc,#03fd
+	ld bc,#03fd			; B is used for the loop, C is used as part of the PORT select
 afxInit0
 	ld (hl),d
 	inc hl
@@ -191,8 +205,14 @@ afxInit0
 	inc hl
 	djnz afxInit0
 
-	ld hl,#ffbf			; initialise AY
-	ld e,#15
+	ld 	hl,#ffbf		; initialise AY
+reloc_in_2:
+	ld	a,(ay_chip_select)	; select the AY chip the user provided
+	ld 	b,h
+	out 	(c),a			; remember `out (c)` is actually out (bc)
+					; now that the AY chip is selected,
+					; future `out` calls use the same chip.
+	ld 	e,#15
 afxInit1 ; runs 15 times (from E register)
 	dec e
 	ld b,h
@@ -200,7 +220,7 @@ afxInit1 ; runs 15 times (from E register)
 	ld b,l
 	out (c),d
 	jr nz,afxInit1
-reloc_in_2:
+reloc_in_3:
 	ld (afxNseMix+1),de             ; reset the player variables
 	ret
 
@@ -212,7 +232,11 @@ reloc_in_2:
 ; --------------------------------------------------------------;
 
 AFXFRAME
-	ld bc,#03fd
+	ld 	bc,#fffd
+reloc_fm_0:
+	ld	a,(ay_chip_select)	; select the AY chip the user provided
+	out 	(c),a
+	ld 	bc,#03fd
 reloc_fm_1:
 	ld ix,afxChDesc
 
@@ -393,6 +417,8 @@ afxChDesc	DS 3*4			; will be populated with 0x0000 0xffff (x 3 via B register)
 
 ayfx_bank:
         defb	0
+ay_chip_select:				; 0-2 AY chip
+        defb	0
 
 active_bank:
         defb	0
@@ -415,6 +441,7 @@ reloc_start:
 	defw	reloc_c1_2+2
 	defw	reloc_c1_3+2
 	defw	reloc_c1_4+2
+	defw	reloc_c1_5+2
 	defw	reloc_c2_1+2
 	defw	reloc_c2_2+2
 	defw	reloc_c2_3+2
@@ -424,11 +451,13 @@ reloc_start:
 	defw	reloc_br_3+2
 	defw	reloc_br_4+2
 	defw 	reloc_in_1+2
-	; why is `reloc_in_2+3` and not `+2` like all the others? It's because
+	defw 	reloc_in_2+2
+	; why is `reloc_in_3+3` and not `+2` like all the others? It's because
 	; reloc_in_2 points to `ld (afxNseMix+1),de` and the `ld (**),de` opcode
 	; is 2 bytes long, and so we have to jump over that amount to track the
 	; reference fully (or certainly that's how I understand it).
-	defw 	reloc_in_2+3
+	defw 	reloc_in_3+3
+	defw	reloc_fm_0+2
 	defw 	reloc_fm_1+3
 	defw 	reloc_fm_2+2
 	defw 	reloc_fm_3+2

@@ -36,10 +36,22 @@ Important: if you're using this driver with the NextDAW driver, make sure to **i
 
 There are currently only two routines available in the driver:
 
-- `1, arg: $bank_id` - initialise the audio to point a 16K bank
+- `1, arg: $bank_id, [$ay_chip=3]` - initialise the audio to point a 16K bank and _optionally_ select an AY chip
 - `2, arg: $effects_id` - start playing the given effect id
 
 **The driver id is 49 (hex 0x31)**
+
+## AY chip select
+
+By default the driver uses AY chip 3. To change the AY chip used, the second argument to routine `1` is the chip number from 1 to 3 (note that 0 will default to chip 3).
+
+This is to add compatibility with other drivers using the AY chips, allowing you, for example, to use AY chip 1 and 2 for NextDAW and AY chip 3 for special effects.
+
+To use AY chip 1, the NextBASIC code is as follows:
+
+```basic
+30 DRIVER 49, 1, 25, 1 : REM use BANK 25 and use AY chip 1
+```
 
 ## Creating Sound Effects
 
@@ -60,7 +72,6 @@ Your mileage will vary. I've personally found that this doesn't create too much 
 Though there's no priority to do so, possible upgrades include:
 
 - De-registration of the driver (this means removing the saved user bank ID)
-- API routine for selecting which AY channel should be used
 
 ## License
 
