@@ -11,6 +11,7 @@ _\* If writing assembly, [Shiru's AYFX Editor](https://shiru.untergrund.net/soft
 - A driver is loaded and is configured to point to a `BANK` that holds [your special effects](#creating-sound-effects).
 - The driver waits for an interrupt and then processes a single frame of audio on the AY-8-3912 chip.
 - The player can play effects using all three AY channels. When there is an empty (not playing) channel, it will be used, otherwise the one that was active for longest time will be used. AY music can't play while this version of the player is active.
+- The driver will also put the selected AY chip into mono mode which boosts the volume of the sound (rather than splitting across stereo left, centre and right), this is done in the interrupt routine by repeatedly setting [NEXTREG $09](https://wiki.specnext.dev/Peripheral_4_Register)
 
 ## Usage
 

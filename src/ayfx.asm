@@ -132,13 +132,34 @@ backup_bank:
 	in	a,(c)			; save register state (https://gitlab.com/thesmog358/tbblue/-/blob/master/demos/esp/espatdrv.asm#L277)
 reloc_br_0:
 	ld	(saved_reg), a
-	ld 	a, MMU6_C000_NR_56
+	ld 	a, MMU6_C000_NR_56	; begin logic for: `a=REG %$56` - ends on ld(active_bank),a
 	out 	(c),a
 	inc 	b 			; $253b to access (read or write) value
 	in 	a,(c)
 reloc_br_1:
 	ld	(active_bank),a
-	dec 	b 			; $243B
+
+	dec	b			; now read that nextreg $09 / Peripheral 4
+	ld 	a, $09
+	out 	(c),a
+	inc 	b
+	in 	c,(c)			; C now holds the NEXTREG $09 value
+reloc_br_2:
+	ld	a,(ay_chip_select)	; get the ay chip (0-2) but stored as 255,254,253
+	and	a
+	jr	z, ay_chip_mono_skip
+	dec	a			; change 255 to 254 so B holds 1-3 (not 0-2)
+	xor	$ff			; A now holds 0-2 (AY chip)
+	ld	b,a
+	ld	a,16			; we'll do 32 << a
+ay_chip_mono_mask_loop:
+	rlca				; rotate instead of shift, as we're shifting a single bit, and this is faster than SLA
+	djnz	ay_chip_mono_mask_loop
+
+	or	c			; OR with 128 to set AY2 to mono
+	nextreg	$09, a
+ay_chip_mono_skip:
+	ld 	bc,$243b		; $243B
 	ld	a,2
 saved_reg equ $-1
 	out	(c),a			; just in case IRQ was in between registry work
@@ -147,15 +168,15 @@ saved_reg equ $-1
 	ret
 
 activate_user_bank:
-reloc_br_2:
-	call	backup_bank
 reloc_br_3:
+	call	backup_bank
+reloc_br_4:
 	ld	a, (ayfx_bank)
 	nextreg	MMU6_C000_NR_56, a
 	ret
 
 restore_bank:
-reloc_br_4:
+reloc_br_5:
 	ld	a, (active_bank)
 	nextreg MMU6_C000_NR_56, a
 	ret
@@ -450,6 +471,7 @@ reloc_start:
 	defw	reloc_br_2+2
 	defw	reloc_br_3+2
 	defw	reloc_br_4+2
+	defw	reloc_br_5+2
 	defw 	reloc_in_1+2
 	defw 	reloc_in_2+2
 	; why is `reloc_in_3+3` and not `+2` like all the others? It's because
