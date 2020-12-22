@@ -309,7 +309,7 @@ afxFrame1
 	jr z,afxFrame3		        ; noise didn't change
 
 	ld a,(hl)			; read noise word
-	sub #20
+	cp #20
 	jr nz,afxFrame2		        ; less than # 20, play on
 	ld h,a				; otherwise end of the effect
 	ld b,#ff
